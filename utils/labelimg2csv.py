@@ -1,5 +1,7 @@
 import os
 import glob
+from argparse import ArgumentParser
+
 import pandas as pd
 import xml.etree.ElementTree as ET
 
@@ -26,10 +28,16 @@ def xml_to_csv(path):
 
 
 def main():
-    image_path = os.path.join(os.getcwd(), 'annotations')
-    xml_df = xml_to_csv(image_path)
-    xml_df.to_csv('raccoon_labels.csv', index=None)
+    parser = ArgumentParser(description="convert labelimage xmls to one csv", usage="python labelimg2csv.py --path <annotated_images_dir> --output <labels.csv file>")
+
+    parser.add_argument("--path", "-p", help="annotated images path", default="../data/annotations/")
+    parser.add_argument("--output", "-o", help="output file", default="../data/labels.csv")
+
+    args = parser.parse_args()
+    xml_df = xml_to_csv(args.path)
+    xml_df.to_csv(args.output, index=None)
     print('Successfully converted xml to csv.')
 
 
-main()
+if __name__ == '__main__':
+    main()

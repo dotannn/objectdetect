@@ -12,11 +12,14 @@ from __future__ import absolute_import
 
 import os
 import io
+from argparse import ArgumentParser
+
 import pandas as pd
 import tensorflow as tf
 
+from . import label_map_util, dataset_util
+
 from PIL import Image
-from object_detection.utils import dataset_util
 from collections import namedtuple
 
 flags = tf.app.flags
@@ -25,10 +28,18 @@ flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
 FLAGS = flags.FLAGS
 
 
-labels_mapping = {
-    'car': 2,
 
-}
+def load_labels_mapping(labels_path):
+    label_map = label_map_util.load_labelmap(labels_path)
+    categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=n_classes, use_display_name=True)
+    category_index = label_map_util.create_category_index(categories)
+
+    labels_mapping = {}
+    for idx in category_index:
+        labels_mapping[category_index[idx]['name']] = idx
+
+    return labels_mapping
+
 
 def split(df, group):
     data = namedtuple('data', ['filename', 'object'])
@@ -36,7 +47,7 @@ def split(df, group):
     return [data(filename, gb.get_group(x)) for filename, x in zip(gb.groups.keys(), gb.groups)]
 
 
-def create_tf_example(group, path):
+def create_tf_example(group, path, labels_mapping):
     with tf.gfile.GFile(os.path.join(path, '{}'.format(group.filename)), 'rb') as fid:
         encoded_jpg = fid.read()
     encoded_jpg_io = io.BytesIO(encoded_jpg)
@@ -78,12 +89,18 @@ def create_tf_example(group, path):
 
 
 def main():
+    parser = ArgumentParser(description="convert csv to tfrecord file")
+
+    parser.add_argument("--labels", "-l", help="labels mapping file", default="../data/labels_mapping/mscoco_label_map.pbtxt")
+    args = parser.parse_args()
+    labels_path = args.labels
+    labels_mapping = load_labels_mapping(labels_path)
     writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
     path = os.path.join(os.getcwd(), 'images')
     examples = pd.read_csv(FLAGS.csv_input)
     grouped = split(examples, 'filename')
     for group in grouped:
-        tf_example = create_tf_example(group, path)
+        tf_example = create_tf_example(group, path, labels_mapping)
         writer.write(tf_example.SerializeToString())
 
     writer.close()
