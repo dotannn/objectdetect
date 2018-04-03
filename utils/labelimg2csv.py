@@ -12,15 +12,19 @@ def xml_to_csv(path):
         tree = ET.parse(xml_file)
         root = tree.getroot()
         for member in root.findall('object'):
-            value = (root.find('filename').text,
-                     int(root.find('size')[0].text),
-                     int(root.find('size')[1].text),
-                     member[0].text,
-                     int(member[4][0].text),
-                     int(member[4][1].text),
-                     int(member[4][2].text),
-                     int(member[4][3].text)
-                     )
+            try:
+                value = (root.find('filename').text,
+                         int(root.find('size')[0].text),
+                         int(root.find('size')[1].text),
+                         member[0].text,
+                         int(member.find('bndbox')[0].text),
+                         int(member.find('bndbox')[1].text),
+                         int(member.find('bndbox')[2].text),
+                         int(member.find('bndbox')[3].text)
+                         )
+            except:
+                continue
+
             xml_list.append(value)
     column_name = ['filename', 'width', 'height', 'class', 'xmin', 'ymin', 'xmax', 'ymax']
     xml_df = pd.DataFrame(xml_list, columns=column_name)
@@ -31,7 +35,7 @@ def main():
     parser = ArgumentParser(description="convert labelimage xmls to one csv", usage="python labelimg2csv.py --path <annotated_images_dir> --output <labels.csv file>")
 
     parser.add_argument("--path", "-p", help="annotated images path", default="../data/annotations/")
-    parser.add_argument("--output", "-o", help="output file", default="../data/labels.csv")
+    parser.add_argument("--output", "-o", help="output file", default="../data/tools_labels.csv")
 
     args = parser.parse_args()
     xml_df = xml_to_csv(args.path)

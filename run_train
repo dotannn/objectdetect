@@ -1,5 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
-python train.py --logtostderr --train_dir=training/ --pipeline_config_path=configs/ssd_mobilenet_v1_coco.config
+python train.py --logtostderr --train_dir=training/ --pipeline_config_path=configs/faster_rcnn_resnet101_tools.config
 
 
 

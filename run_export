@@ -3,5 +3,5 @@ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 python export_inference_graph.py \
     --input_type image_tensor \
     --pipeline_config_path configs/ssd_mobilenet_v1_coco.config \
-    --trained_checkpoint_prefix configs/model.ckpt-10856 \
+    --trained_checkpoint_prefix configs/model.ckpt-6423 \
     --output_directory new_model

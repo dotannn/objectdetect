@@ -1,0 +1,35 @@
+item {
+  name: "/m/01g317"
+  id: 1
+  display_name: "Grasper"
+}
+item {
+  name: "/m/0199g"
+  id: 2
+  display_name: "Hook"
+}
+item {
+  name: "/m/0k4j"
+  id: 3
+  display_name: "ClipApplicator"
+}
+item {
+  name: "/m/04_sv"
+  id: 4
+  display_name: "Scissors"
+}
+item {
+  name: "/m/05czz6l"
+  id: 5
+  display_name: "SuctionIrrigator"
+}
+item {
+  name: "/m/01bjv"
+  id: 6
+  display_name: "SpecimenBag"
+}
+item {
+  name: "/m/07jdr"
+  id: 7
+  display_name: "Bipolar"
+}

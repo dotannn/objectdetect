@@ -68,8 +68,8 @@ with contents:
 """
 import tensorflow as tf
 from google.protobuf import text_format
-from . import exporter
-from utils import pipeline_pb2
+import exporter
+from protos import pipeline_pb2
 
 slim = tf.contrib.slim
 flags = tf.app.flags

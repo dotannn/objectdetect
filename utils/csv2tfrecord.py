@@ -17,7 +17,7 @@ from argparse import ArgumentParser
 import pandas as pd
 import tensorflow as tf
 
-from . import label_map_util, dataset_util
+import label_map_util, dataset_util
 
 from PIL import Image
 from collections import namedtuple
@@ -28,8 +28,7 @@ flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
 FLAGS = flags.FLAGS
 
 
-
-def load_labels_mapping(labels_path):
+def load_labels_mapping(labels_path, n_classes=7):
     label_map = label_map_util.load_labelmap(labels_path)
     categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=n_classes, use_display_name=True)
     category_index = label_map_util.create_category_index(categories)
@@ -64,12 +63,17 @@ def create_tf_example(group, path, labels_mapping):
     classes = []
 
     for index, row in group.object.iterrows():
+        class_idx = labels_mapping.get( row['class'], None )
+        if class_idx is None:
+            continue
+
         xmins.append(row['xmin'] / width)
         xmaxs.append(row['xmax'] / width)
         ymins.append(row['ymin'] / height)
         ymaxs.append(row['ymax'] / height)
+
         classes_text.append(row['class'].encode('utf8'))
-        classes.append(labels_mapping.get(row['class'], None)
+        classes.append(class_idx)
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
         'image/height': dataset_util.int64_feature(height),
@@ -90,23 +94,34 @@ def create_tf_example(group, path, labels_mapping):
 
 def main():
     parser = ArgumentParser(description="convert csv to tfrecord file")
+    parser.add_argument("--labels", "-l", help="labels mapping file", default="../data/labels_mapping/tools_label_map.pbtxt")
+    parser.add_argument( "--csv", "-c", help="csv input",
+                         default="../data/tools_labels.csv" )
 
-    parser.add_argument("--labels", "-l", help="labels mapping file", default="../data/labels_mapping/mscoco_label_map.pbtxt")
+    parser.add_argument( "--images", "-i", help="images path",
+                         default="images" )
+
+    parser.add_argument( "--output", "-o", help="output",
+                         default="tools_train.record" )
+
     args = parser.parse_args()
     labels_path = args.labels
+    output_path = args.output
+    csv_input = args.csv
+    images_path = args.images
     labels_mapping = load_labels_mapping(labels_path)
-    writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
-    path = os.path.join(os.getcwd(), 'images')
-    examples = pd.read_csv(FLAGS.csv_input)
+    writer = tf.python_io.TFRecordWriter(output_path)
+    path = images_path
+    examples = pd.read_csv(csv_input)
     grouped = split(examples, 'filename')
     for group in grouped:
         tf_example = create_tf_example(group, path, labels_mapping)
         writer.write(tf_example.SerializeToString())
 
     writer.close()
-    output_path = os.path.join(os.getcwd(), FLAGS.output_path)
+    output_path = os.path.join(os.getcwd(), output_path)
     print('Successfully created the TFRecords: {}'.format(output_path))
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    main()

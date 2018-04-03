@@ -62,12 +62,12 @@ def detect_video(detection_graph, category_index, vid):
 
 
 def main():
-    MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
+    MODEL_NAME = 'frcnn_resnet50_anatomy'
     model_path = 'models/' + MODEL_NAME + '/frozen_inference_graph.pb'
-    labels_path = os.path.join( 'data/labels_mapping', 'mscoco_label_map.pbtxt' )
-    n_classes = 90
+    labels_path = os.path.join( 'data/labels_mapping', 'anatomy_label_map.pbtxt' )
+    n_classes = 1
 
-    sample_video = cv2.VideoCapture('data/sample/person15_walking_d1_uncomp.avi')
+    sample_video = cv2.VideoCapture('/media/dotan/Data/theator/datasets/theator-lapchole/MLP/MPL_002/MPL_LC(091217)_002.mp4')
     detection_graph, category_index = load_model(model_path, labels_path, n_classes)
     detect_video(detection_graph, category_index, sample_video)
 
